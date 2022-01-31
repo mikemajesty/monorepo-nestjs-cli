@@ -1,6 +1,6 @@
 {
   "name": "@mikemajesty/monorepo-nestjs-cli",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Monorepo CLI",
   "main": "src/index.js",
   "scripts": {
