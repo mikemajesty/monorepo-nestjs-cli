@@ -46,7 +46,7 @@
   - package.json
   ```json
    "start:your-api:dev": "nest start @app/your-api --debug 0.0.0.0:5880 --watch",
-   "start:your-api:prd": "nest start @app/your-api --debug 0.0.0.0:5880 --watch",
+   "start:your-api:prd": "node dist/apps/your-api/main.js",
   ```
   - docker-compose.yml
 
