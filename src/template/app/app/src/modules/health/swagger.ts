@@ -1,4 +1,4 @@
-import { name } from 'apps/auth-api/package.json';
+import { name } from 'apps/your-api/package.json';
 import { Swagger } from 'libs/utils';
 
 export class SwagggerResponse {

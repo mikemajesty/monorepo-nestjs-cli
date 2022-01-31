@@ -17,31 +17,15 @@
         }
       }
   ```
- - .vscode/launch.json
-  ```json
-  ...
-  {
-        "name": "Debug: yourAPI",
-        "type": "node",
-        "request": "attach",
-        "remoteRoot": "/src",
-        "localRoot": "${workspaceFolder}",
-        "protocol": "inspector",
-        "port": 5880,
-        "restart": true,
-        "address": "0.0.0.0",
-        "skipFiles": ["<node_internals>/**"]
-      }
-  ```
   - .env
   ```bash
-  $ PORT_your_API=4000
+  $ PORT_API=4000
   ```
   - apps/libs/modules/secrets/enum.ts
   ```ts
   ...
   export enum yourAPIEnvironment {
-    PORT = 'PORT_your_API',
+    PORT = 'PORT_API',
   }
   ```
 
@@ -61,7 +45,8 @@
   ```
   - package.json
   ```json
-   "start:your-api": "nest start @app/your-api --debug 0.0.0.0:5880 --watch",
+   "start:your-api:dev": "nest start @app/your-api --debug 0.0.0.0:5880 --watch",
+   "start:your-api:prd": "nest start @app/your-api --debug 0.0.0.0:5880 --watch",
   ```
   - docker-compose.yml
 
@@ -79,7 +64,3 @@
       - .:/src:cached
 
   ```
-
-  - Add a file with your app name in test folder where it will be set the tests envs, exemple:
-
-  ```├── tests - your-api.js```
