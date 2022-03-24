@@ -1,14 +1,14 @@
 import { HttpStatus, RequestMethod, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { description, name, version } from 'apps/app/package.json';
-import { ICommonSecrets, ILoggerService } from 'libs/modules/global';
+import { description, name, version } from 'apps/auth-api/package.json';
+import { ILoggerService, ISecretsService } from 'libs/modules/global';
 import {
   ApiException,
   AppExceptionFilter,
   DEFAULT_TAG,
   ExceptionInterceptor,
-  PerformanceInterceptor,
+  HttpLoggerInterceptor,
   SWAGGER_API_ROOT,
 } from 'libs/utils';
 
@@ -30,12 +30,12 @@ async function bootstrap() {
 
   loggerService.setContext(name);
   app.useGlobalFilters(new AppExceptionFilter(loggerService));
-  app.useGlobalInterceptors(new ExceptionInterceptor(), new PerformanceInterceptor(loggerService));
+  app.useGlobalInterceptors(new ExceptionInterceptor(), new HttpLoggerInterceptor(loggerService));
 
   const {
-    appAPI: { PORT },
+    yourAPI: { PORT },
     ENV,
-  } = app.get(ICommonSecrets);
+  } = app.get(ISecretsService);
 
   app.useLogger(loggerService);
 

@@ -1,6 +1,6 @@
 {
-  "name": "@app/auth.api",
-  "version": "0.0.1",
+  "name": "@app/your.api",
+  "version": "v0.0.1",
   "description": "monorepo your-api",
   "scripts": {
     "format": "../../tools/eslint/node_modules/.bin/prettier --write \"**/*.{ts, js, json}\"",
