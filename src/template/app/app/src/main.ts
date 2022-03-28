@@ -1,16 +1,15 @@
 import { HttpStatus, RequestMethod, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { description, name, version } from 'apps/auth-api/package.json';
-import { ILoggerService, ISecretsService } from 'libs/modules/global';
-import {
-  ApiException,
-  AppExceptionFilter,
-  DEFAULT_TAG,
-  ExceptionInterceptor,
-  HttpLoggerInterceptor,
-  SWAGGER_API_ROOT,
-} from 'libs/utils';
+import { description, name, version } from 'apps/your-api/package.json';
+import { ILoggerService } from 'libs/modules/global/logger/adapter';
+import { ISecretsService } from 'libs/modules/global/secrets/adapter';
+import { ApiException } from 'libs/utils';
+import { DEFAULT_TAG, SWAGGER_API_ROOT } from 'libs/utils/documentation/constants';
+import { AppExceptionFilter } from 'libs/utils/filters/http-exception.filter';
+import { ExceptionInterceptor } from 'libs/utils/interceptors/http-exception.interceptor';
+import { HttpLoggerInterceptor } from 'libs/utils/interceptors/http-logger.interceptor';
+import { LogAxiosErrorInterceptor } from 'nestjs-convert-to-curl';
 
 import { MainModule } from './modules/module';
 
@@ -30,7 +29,12 @@ async function bootstrap() {
 
   loggerService.setContext(name);
   app.useGlobalFilters(new AppExceptionFilter(loggerService));
-  app.useGlobalInterceptors(new ExceptionInterceptor(), new HttpLoggerInterceptor(loggerService));
+
+  app.useGlobalInterceptors(
+    new ExceptionInterceptor(),
+    new HttpLoggerInterceptor(loggerService),
+    new LogAxiosErrorInterceptor(),
+  );
 
   const {
     yourAPI: { PORT },

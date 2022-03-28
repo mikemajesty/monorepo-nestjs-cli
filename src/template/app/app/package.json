@@ -1,6 +1,6 @@
 {
   "name": "@app/your.api",
-  "version": "v0.0.1",
+  "version": "v0.0.19",
   "description": "monorepo your-api",
   "scripts": {
     "format": "../../tools/eslint/node_modules/.bin/prettier --write \"**/*.{ts, js, json}\"",
