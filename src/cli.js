@@ -110,10 +110,9 @@ class Scaffold extends EventEmitter {
     const files = await this._globDir(fromDir)
     const map = {}
 
-    console.log('----------------------', files)
+    console.log(files)
     files.forEach(file => {
       const fromFile = path.join(fromDir, file)
-      console.log('======================', toDir)
       const toFile = path.join(toDir, file)
 
       // Only substitute path when `to` is not explicitly specified.
