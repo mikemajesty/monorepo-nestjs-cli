@@ -4,7 +4,6 @@
   "description": "Monorepo CLI",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"OOOOI\" && exit 1",
     "permission": "chmod -R 777 ./bin/*"
   },
   "bin": {
