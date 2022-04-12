@@ -1,40 +1,44 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { GlobalModule } from 'libs/modules/global/module';
 import { ApiException } from 'libs/utils';
 import * as request from 'supertest';
 
-import { IModuleService } from '../adapter';
-import { ModuleController } from '../controller';
-import { ModuleService } from '../service';
+import { name, version } from '../../../../package.json';
+import { IHealthService } from '../adapter';
+import { HealthController } from '../controller';
+import { HealthService } from '../service';
 
-describe('<name>Controller (e2e)', () => {
+describe('HealthController (e2e)', () => {
   let app: INestApplication;
-  let service: IModuleService;
+  let service: IHealthService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [ModuleController],
+      controllers: [HealthController],
       providers: [
         {
-          provide: IModuleService,
-          useClass: ModuleService,
-        },
+          provide: IHealthService,
+          useClass: HealthService
+        }
       ],
+      imports: [GlobalModule],
     }).compile();
 
     app = module.createNestApplication();
-    service = module.get(IModuleService);
+    service = module.get(IHealthService);
     await app.init();
   });
-
-  describe('/module (GET)', () => {
-    it(`should getExemple successfully`, async () => {
-      return request(app.getHttpServer()).get('/module').expect('exemple');
+  // TODO
+  describe('/health (GET)', () => {
+    const text = `${name}-${version} UP!!`;
+    it(`should return ${text}`, async () => {
+      return request(app.getHttpServer()).get('/health').expect(text);
     });
 
-    it(`should getExemple with error 500`, async () => {
-      service.exemple = jest.fn().mockRejectedValue(new ApiException('Error'));
-      return request(app.getHttpServer()).get('/module').expect({ statusCode: 500, message: 'Error' });
+    it(`should getHealth with throw statusCode 500`, async () => {
+      service.getText = jest.fn().mockRejectedValue(new ApiException('Error'));
+      return request(app.getHttpServer()).get('/health').expect({ statusCode: 500, message: 'Error' });
     });
   });
 

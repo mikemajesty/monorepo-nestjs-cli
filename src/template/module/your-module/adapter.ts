@@ -1,3 +1,3 @@
-export abstract class IModuleService {
-  abstract exemple(): string;
+export abstract class IHealthService {
+  abstract getText(): Promise<string>;
 }

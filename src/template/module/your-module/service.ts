@@ -1,10 +1,19 @@
 import { Injectable } from '@nestjs/common';
+import { name, version } from 'apps/your-api/package.json';
+import { ILoggerService } from 'libs/modules/global/logger/adapter';
 
-import { IModuleService } from './adapter';
+import { IHealthService } from './adapter';
 
 @Injectable()
-export class ModuleService implements IModuleService {
-  exemple(): string {
-    return this.exemple.name;
+export class HealthService implements IHealthService {
+  constructor(
+    private readonly loggerService: ILoggerService,
+  ) {}
+
+  async getText(): Promise<string> {
+    const appName = `${name}-${version} UP!!`;
+    this.loggerService.log(appName, `${HealthService.name}/${this.getText.name}`);
+
+    return appName;
   }
 }

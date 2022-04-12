@@ -2,13 +2,13 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "App: @app/your.api",
+      "name": "App: @app/main.api",
       "type": "node",
       "request": "launch",
       "localRoot": "${workspaceFolder}/../../",
       "runtimeExecutable": "yarn",
       "runtimeArgs": [
-        "start:your-api:dev"
+        "start:other-api:dev"
       ],
       "console": "integratedTerminal",
       "smartStep": true,
@@ -19,21 +19,16 @@
       ]
     },
     {
-      "name": "Test: @app/your.api",
       "type": "node",
-      "args": [
-        "--runInBand",
-        "--config=${workspaceFolder}/jest.config.js"
-      ],
+      "args": ["--runInBand", "--config=${workspaceFolder}/jest.config.js"],
       "request": "launch",
       "console": "integratedTerminal",
+      "name": "Test: @app/main.api",
       "runtimeExecutable": "yarn",
       "cwd": "${workspaceFolder}",
-      "runtimeArgs": [
-        "test"
-      ],
+      "runtimeArgs": ["test"],
       "port": 9229,
       "sourceMaps": true
-    }
+    }  
   ]
-}
+ }

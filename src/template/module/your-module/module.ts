@@ -1,17 +1,16 @@
 import { Module } from '@nestjs/common';
 
-import { IModuleService } from './adapter';
-import { ModuleController } from './controller';
-import { ModuleService } from './service';
+import { IHealthService } from './adapter';
+import { HealthController } from './controller';
+import { HealthService } from './service';
 
 @Module({
-  controllers: [ModuleController],
+  controllers: [HealthController],
   providers: [
     {
-      provide: IModuleService,
-      useClass: ModuleService,
+      provide: IHealthService,
+      useClass: HealthService,
     },
   ],
-  exports: [IModuleService],
 })
-export class NameModule {}
+export class HealthModule {}

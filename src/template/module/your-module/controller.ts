@@ -1,18 +1,18 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { IModuleService } from './adapter';
+import { IHealthService } from './adapter';
 import { SwagggerResponse } from './swagger';
 
 @Controller()
-@ApiTags('module')
-export class ModuleController {
-  constructor(private readonly service: IModuleService) {}
+@ApiTags('health')
+export class HealthController {
+  constructor(private readonly healthService: IHealthService) {}
 
-  @Get('/module')
-  @ApiResponse(SwagggerResponse.getExemple[200])
-  @ApiResponse(SwagggerResponse.getExemple[500])
-  async getExemple(): Promise<string> {
-    return this.service.exemple();
+  @Get('/health')
+  @ApiResponse(SwagggerResponse.getHealth[200])
+  @ApiResponse(SwagggerResponse.getHealth[500])
+  async getHealth(): Promise<string> {
+    return this.healthService.getText();
   }
 }

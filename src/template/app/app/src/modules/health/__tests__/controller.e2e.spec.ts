@@ -1,6 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ILoggerService } from 'libs/modules/global/logger/adapter';
+import { GlobalModule } from 'libs/modules/global/module';
 import { ApiException } from 'libs/utils';
 import * as request from 'supertest';
 
@@ -21,12 +21,8 @@ describe('HealthController (e2e)', () => {
           provide: IHealthService,
           useClass: HealthService,
         },
-        {
-          provide: ILoggerService,
-          useValue: { log: jest.fn() },
-        },
       ],
-      imports: [],
+      imports: [GlobalModule],
     }).compile();
 
     app = module.createNestApplication();

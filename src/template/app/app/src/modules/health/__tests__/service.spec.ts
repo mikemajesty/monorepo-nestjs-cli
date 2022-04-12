@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing';
-import { ILoggerService } from 'libs/modules/global/logger/adapter';
+import { GlobalModule } from 'libs/modules/global/module';
 
 import { name, version } from '../../../../package.json';
 import { IHealthService } from '../adapter';
@@ -10,14 +10,11 @@ describe('HealthService', () => {
 
   beforeEach(async () => {
     const app = await Test.createTestingModule({
+      imports: [GlobalModule],
       providers: [
         {
           provide: IHealthService,
           useClass: HealthService,
-        },
-        {
-          provide: ILoggerService,
-          useValue: { log: jest.fn() },
         },
       ],
     }).compile();
@@ -27,7 +24,8 @@ describe('HealthService', () => {
 
   describe('getText', () => {
     test('should getText successfully', async () => {
-      await expect(healthService.getText()).resolves.toEqual(`${name}-${version} UP!!`);
+      const text = `${name}-${version} UP!!`;
+      await expect(healthService.getText()).resolves.toEqual(text);
     });
   });
 });

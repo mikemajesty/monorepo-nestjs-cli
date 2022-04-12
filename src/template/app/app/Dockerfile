@@ -6,23 +6,23 @@ WORKDIR /app
 
 RUN ls /app -al
 
-RUN yarn && yarn build @app/your-api
+RUN yarn && yarn build @app/other-api
 
-COPY apps/your-api/package.json dist/apps/your-api/
-COPY apps/your-api/tsconfig.build.json dist/apps/your-api/
-COPY apps/your-api/tsconfig.json dist/apps/your-api/
+COPY apps/other-api/package.json dist/apps/other-api/
+COPY apps/other-api/tsconfig.build.json dist/apps/other-api/
+COPY apps/other-api/tsconfig.json dist/apps/other-api/
 
-EXPOSE 4000
+EXPOSE 3000
 
-RUN yarn --cwd dist/apps/your-api
+RUN yarn --cwd dist/apps/other-api
 RUN yarn --cwd dist/apps/libs/modules
 RUN yarn --cwd dist/apps/libs/utils
 RUN yarn --cwd dist/apps/libs/core
 
-RUN ls dist/apps/your-api -al
+RUN ls dist/apps/other-api -al
 
 RUN ls /app -al
 
 RUN yarn
 
-CMD yarn --cwd apps start:your-api:prd
+CMD yarn --cwd app start:other-api:prd

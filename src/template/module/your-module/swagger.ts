@@ -1,11 +1,12 @@
-import { Swagger } from 'libs/utils';
+import { name } from 'apps/your-api/package.json';
+import { Swagger } from 'libs/utils/documentation/swagger';
 
 export class SwagggerResponse {
-  static getExemple = {
-    200: Swagger.defaultResponseText({ status: 200, text: 'exemple' }),
+  static getHealth = {
+    200: Swagger.defaultResponseText({ status: 200, text: `${name} UP!!` }),
     500: Swagger.defaultResponseError({
       status: 500,
-      route: '/module',
+      route: '/health',
     }),
   };
 }

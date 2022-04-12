@@ -1,27 +1,31 @@
 import { Test } from '@nestjs/testing';
+import { GlobalModule } from 'libs/modules/global/module';
 
-import { IModuleService } from '../adapter';
-import { ModuleService } from '../service';
+import { name, version } from '../../../../package.json';
+import { IHealthService } from '../adapter';
+import { HealthService } from '../service';
 
 describe('HealthService', () => {
-  let healthService: IModuleService;
+  let healthService: IHealthService;
 
   beforeEach(async () => {
     const app = await Test.createTestingModule({
+      imports: [GlobalModule],
       providers: [
         {
-          provide: IModuleService,
-          useClass: ModuleService,
+          provide: IHealthService,
+          useClass: HealthService
         },
       ],
     }).compile();
 
-    healthService = app.get(IModuleService);
+    healthService = app.get(IHealthService);
   });
 
-  describe('exemple', () => {
-    test('should exemple successfully', () => {
-      expect(healthService.exemple()).toEqual('exemple');
+  describe('getText', () => {
+    test('should getText successfully', async () => {
+      const text = `${name}-${version} UP!!`;
+      await expect(healthService.getText()).resolves.toEqual(text);
     });
   });
 });

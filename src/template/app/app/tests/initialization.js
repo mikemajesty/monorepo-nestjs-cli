@@ -1,6 +1,4 @@
-// your-api env and mocks initialization
-
-
+// other-api env and mocks initialization
 
 
 
