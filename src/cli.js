@@ -1,6 +1,7 @@
 import arg from 'arg';
 import fs from 'fs';
 import path from 'path';
+import { bold, green, red } from 'colorette';
 const fse = require('fs-extra');
 const { getController, getAdapter, getModule, getService, getSwagger } = require('./scafold/module');
 const { getControllerTest, getModuleTest, getServiceTest } = require('./scafold/tests');
@@ -205,8 +206,6 @@ export async function cli(args) {
     }
   }
 
-  console.log('paths', paths)
-
   const config = { type: 'directory' }
 
   try {
@@ -223,7 +222,13 @@ export async function cli(args) {
       fs.rmSync(paths[0], { recursive: true });
     }
 
-    console.log('done')
+    const isAPP = args.find(a => a === '--app')
+    
+    console.log(bold(green('done')))
+
+    if (isAPP) {
+      console.log(red('!!!!!!!!!!REAMDE!!!!!!!'), bold('https://github.com/mikemajesty/monorepo-nestjs-cli/blob/master/APP.md'))
+    }
 
   } catch (error) {
     console.log(error)
