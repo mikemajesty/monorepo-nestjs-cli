@@ -4,7 +4,7 @@ import path from 'path';
 const fse = require('fs-extra');
 const { getController, getAdapter, getModule, getService, getSwagger } = require('./scafold/module');
 const { getControllerTest, getModuleTest, getServiceTest } = require('./scafold/tests');
-const { getJestConfig, getTsconfigBuild, getTsconfig, getPackage, getDockerFile, getDockerignore, getEslitignore } = require('./scafold/app/root');
+const { getJestConfig, getTsconfigBuild, getTsconfig, getPackage, getDockerFile, getDockerignore, getEslitignore, vsCode } = require('./scafold/app/root');
 const { getTests } = require('./scafold/app/tests');
 const { getMain, getSourceModule, health, healthTests } = require('./scafold/app/src');
 const dialogNode = require('node-file-dialog')
@@ -47,6 +47,19 @@ const createMonorepoApp = (name) => {
     fs.writeFileSync(`${dirRoot}/package.json`, getPackage(name).replace(/''/g, '\''))
     fs.writeFileSync(`${dirRoot}/tsconfig.build.json`, getTsconfigBuild())
     fs.writeFileSync(`${dirRoot}/tsconfig.json`, getTsconfig(name))
+
+    const dirVsCode = dirRoot + '/.vscode'
+
+    if (fs.existsSync(dirVsCode)) {
+      fs.rmSync(dirVsCode, { recursive: true });
+    }
+
+    fs.mkdirSync(dirVsCode)
+
+    fs.writeFileSync(`${dirVsCode}/extensions.json`, vsCode(name).extensions)
+    fs.writeFileSync(`${dirVsCode}/launch.json`, vsCode(name).launch.replace(/##/g, '$'))
+    fs.writeFileSync(`${dirVsCode}/settings.json`, vsCode(name).settings)
+
 
     const dirTests = dirRoot + '/tests'
 
