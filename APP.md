@@ -1,6 +1,6 @@
 ### Adding a new API
 
-##### after ```monorepo-nestjs-cli --app --name=client```
+##### ```monorepo-nestjs-cli --app --name=client```
 
  - Associating the API with the monorepo
   ```ts
