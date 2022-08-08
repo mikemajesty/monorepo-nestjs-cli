@@ -3,7 +3,7 @@
 ##### after ```monorepo-nestjs-cli --app --name=client```
 
  - Associating the API with the monorepo
-  ```json
+  ```ts
     ...
     //nest-cli.json
     "@app/client-api": {
@@ -57,7 +57,7 @@
     };
   ```
   - Creating API execution
-  ```json
+  ```ts
    ...
    //package.json
    "scripts": {
@@ -67,7 +67,7 @@
    ...
   ```
   - Adding API install commmand to 'monorepo:install'
-  ```json
+  ```ts
    ...
    //package.json
    "scripts": {
