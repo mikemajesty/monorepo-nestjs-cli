@@ -1,226 +1,221 @@
 import arg from 'arg';
-import dialog from 'node-file-dialog';
-import { exec } from 'child_process';
-import fs from 'fs-extra';
-import * as path from 'path';
-import { EventEmitter } from 'events';
-import mustache from 'mustache';
-import {isFunction, isObject} from 'core-util-is';
-import { glob } from 'glob-gitignore';
+import fs from 'fs';
+import path from 'path';
+const fse = require('fs-extra');
+const { getController, getAdapter, getModule, getService, getSwagger } = require('./scafold/module');
+const { getControllerTest, getModuleTest, getServiceTest } = require('./scafold/tests');
+const { getJestConfig, getTsconfigBuild, getTsconfig, getPackage, getDockerFile, getDockerignore, getEslitignore } = require('./scafold/app/root');
+const { getTests } = require('./scafold/app/tests');
+const { getMain, getSourceModule, health, healthTests } = require('./scafold/app/src');
+const dialogNode = require('node-file-dialog')
 
-const REGEX_IS_GLOB_FILE = /[^\/]$/
-
-export function parseArgumentsInoOptions(rawArgs) {
+export const parseArgumentsInoOptions = async (rawArgs) => {
   const args = arg(
-  {
-    '--module': Boolean,
-    '--test': Boolean,
-    '--app': Boolean,
-  },
-  {
-    argv: rawArgs.slice(2)
-  }
+    {
+      '--module': Boolean,
+      '--test': Boolean,
+      '--name': String,
+      '--app': Boolean,
+    },
+    {
+      argv: rawArgs.slice(2)
+    }
   )
   return {
     template: args._[0],
-    module: args['--module'] ? `${__dirname}/template/module` : '',
-    test: args['--test'] ? `${__dirname}/template/test` : '',
-    app: args['--app'] ? `${__dirname}/template/app` : ''
+    module: args['--module'] ? await createMonorepoModule(args['--name']) : false,
+    test: args['--test'] ? await createMonorepoTest(args['--name']) : false,
+    app: args['--app'] ? await createMonorepoApp(args['--name']) : false
   }
 }
-class Scaffold extends EventEmitter {
-  constructor (options) {
-    super()
 
-    if (!isObject(options)) {
-      throw new TypeError('options must be an object')
+const createMonorepoApp = (name) => {
+  if (!name) throw new Error('--name is required')
+  name = name.toLowerCase()
+  const dirRoot = `${__dirname}/scafold/templates/${name}-api`
+
+  try {
+    if (fs.existsSync(dirRoot)) {
+      fs.rmSync(dirRoot, { recursive: true });
     }
 
-    const {
-      render,
-      override = true,
-      backup = true,
-      data,
-      ignore
-    } = options
+    fs.mkdirSync(dirRoot)
+    fs.writeFileSync(`${dirRoot}/.dockerignore`, getDockerignore(name))
+    fs.writeFileSync(`${dirRoot}/.eslintignore`, getEslitignore(name))
+    fs.writeFileSync(`${dirRoot}/jest.config.js`, getJestConfig())
+    fs.writeFileSync(`${dirRoot}/Dockerfile`, getDockerFile(name))
+    fs.writeFileSync(`${dirRoot}/package.json`, getPackage(name).replace(/''/g, '\''))
+    fs.writeFileSync(`${dirRoot}/tsconfig.build.json`, getTsconfigBuild())
+    fs.writeFileSync(`${dirRoot}/tsconfig.json`, getTsconfig(name))
 
-    if (!isFunction(render)) {
-      throw new TypeError('options.render must be a function')
+    const dirTests = dirRoot + '/tests'
+
+    if (fs.existsSync(dirTests)) {
+      fs.rmSync(dirTests, { recursive: true });
     }
 
-    if (!isObject(data)) {
-      throw new TypeError('options.data must be an object')
+    fs.mkdirSync(dirTests)
+    fs.writeFileSync(`${dirTests}/initialization.js`, getTests(name))
+
+    const dirSrc = dirRoot + '/src'
+
+    if (fs.existsSync(dirSrc)) {
+      fs.rmSync(dirSrc, { recursive: true });
     }
 
-    this._render = render
-    this._override = override
-    this._backup = backup
-    this._data = data
-    this._ignore = ignore
-  }
+    fs.mkdirSync(dirSrc)
+    fs.writeFileSync(`${dirSrc}/main.ts`, getMain(name).replace(/##/g, '$').replace(/''/g, '`'))
 
-  // - from/to: we dont know whether it is a file or directory
-  // - fromDir/toDir: it is a dir
-  // - fromFile/toFile: it is a file
+    const dirModule = dirSrc + '/modules'
 
-  // We don't know
-  copy (from, to) {
-    if (Object(from) === from) {
-      return this._copyMaps(from)
+    if (fs.existsSync(dirModule)) {
+      fs.rmSync(dirModule, { recursive: true });
     }
 
-    return this._copy(from, to)
-  }
+    fs.mkdirSync(dirModule)
+    fs.writeFileSync(`${dirModule}/module.ts`, getSourceModule())
 
-  _copyMaps (map) {
-    const tasks = Object.keys(map).map(from => {
-      const to = map[from]
-      return this._copy(from, to)
-    })
 
-    return Promise.all(tasks)
-  }
+    const dirHealth = dirModule + '/health'
 
-  // We don't know whether from or to is a file or directory
-  async _copy (from, to) {
-    const stat = await fs.stat(from)
-
-    // If from is a directory, we suppose that `to` is a directory
-    if (stat.isDirectory()) {
-      return this._copyDirToDir(from, to)
+    if (fs.existsSync(dirHealth)) {
+      fs.rmSync(dirHealth, { recursive: true });
     }
 
-    return fs.stat(to)
-    .then(
-      stat => {
-        if (stat.isDirectory()) {
-          // Copy file -> Dir
-          to = path.join(to, path.basename(from))
-        }
+    fs.mkdirSync(dirHealth)
 
-        // Copy file -> file
-        return this._copyFileToFile(from, to)
-      },
-      () => this._copyFileToFile(from, to)
-    )
-  }
+    fs.writeFileSync(`${dirHealth}/adapter.ts`, health(name).adapter)
+    fs.writeFileSync(`${dirHealth}/controller.ts`, health(name).controller)
+    fs.writeFileSync(`${dirHealth}/module.ts`, health(name).module)
+    fs.writeFileSync(`${dirHealth}/service.ts`, health(name).service.replace(/##/g, '$').replace(/''/g, '`'))
+    fs.writeFileSync(`${dirHealth}/swagger.ts`, health(name).swagger.replace(/##/g, '$').replace(/''/g, '`'))
 
-  // Copy dir to dir
-  async _copyDirToDir (fromDir, toDir) {
-    const files = await this._globDir(fromDir)
-    const map = {}
+    const dirHealthTests = dirHealth + '/__tests__'
 
-    console.log(files)
-    files.forEach(file => {
-      const fromFile = path.join(fromDir, file)
-      const toFile = path.join(toDir, file)
-
-      // Only substitute path when `to` is not explicitly specified.
-      map[fromFile] = toFile
-    })
-
-    return this._copyFilesToFiles(map)
-  }
-
-  async _globDir (root) {
-    const options = {
-      cwd: root,
-      dot: true,
-      // Then, the dirs in `files` will end with a slash `/`
-      mark: true
+    if (fs.existsSync(dirHealthTests)) {
+      fs.rmSync(dirHealthTests, { recursive: true });
     }
 
-    if (this._ignore) {
-      options.ignore = this._ignore
+    fs.mkdirSync(dirHealthTests)
+    fs.writeFileSync(`${dirHealthTests}/controller.e2e.spec.ts`, healthTests(name).controller.replace(/##/g, '$').replace(/''/g, '`'))
+    fs.writeFileSync(`${dirHealthTests}/service.spec.ts`, healthTests(name).service.replace(/##/g, '$').replace(/''/g, '`'))
+    fs.writeFileSync(`${dirHealthTests}/module.spec.ts`, healthTests(name).module)
+
+    return `${name}-api`
+  } catch (error) {
+    console.log('error', error)
+    if (fs.existsSync(dirRoot)) {
+      fs.rmSync(dirRoot, { recursive: true });
     }
 
-    const files = await glob('**/*', options)
-    return files.filter(REGEX_IS_GLOB_FILE.test, REGEX_IS_GLOB_FILE)
+    return `${name}-api`
   }
 
-  _copyFilesToFiles (map) {
-    const tasks = Object.keys(map).map(from => {
-      const to = map[from]
-      return this._copyFileToFile(from, to)
-    })
+}
 
-    return Promise.all(tasks)
-  }
+const createMonorepoModule = async (name) => {
+  if (!name) throw new Error('--name is required')
+  name = name.toLowerCase()
+  const dir = `${__dirname}/scafold/templates/${name}`
 
-  // Substitute filename
-  _to (to) {
-    return this._render(to, this._data)
-  }
+  try {
 
-  async _readAndTemplate (path) {
-    const content = await fs.readFile(path)
-    return this._render(content.toString(), this._data)
-  }
-
-  async write (to, template) {
-    const override = await this._shouldOverride(to)
-    if (!override) {
-      return
+    if (fs.existsSync(dir)) {
+      fs.rmSync(dir, { recursive: true });
     }
 
-    const content = this._render(template, this._data)
-    return fs.outputFile(to, content)
-  }
+    fs.mkdirSync(dir)
+    fs.writeFileSync(`${dir}/controller.ts`, getController(name))
+    fs.writeFileSync(`${dir}/adapter.ts`, getAdapter(name))
+    fs.writeFileSync(`${dir}/module.ts`, getModule(name))
+    fs.writeFileSync(`${dir}/service.ts`, getService(name))
+    fs.writeFileSync(`${dir}/swagger.ts`, getSwagger(name))
 
-  async _copyFileToFile (fromFile, to) {
-    const toFile = this._to(to)
-    const override = await this._shouldOverride(toFile)
-    if (!override) {
-      return
+    const dirTest = dir + '/__tests__'
+
+    if (fs.existsSync(dirTest)) {
+      fs.rmSync(dirTest, { recursive: true });
     }
 
-    const content = await this._readAndTemplate(fromFile)
-    const stat = await fs.stat(fromFile)
-    return fs.outputFile(toFile, content, {
-      mode: stat.mode
-    })
+    fs.mkdirSync(dirTest)
+
+    fs.writeFileSync(`${dirTest}/controller.e2e.spec.ts`, getControllerTest(name))
+    fs.writeFileSync(`${dirTest}/module.spec.ts`, getModuleTest(name))
+    fs.writeFileSync(`${dirTest}/service.spec.ts`, getServiceTest(name))
+
+    return name
+
+  } catch (error) {
+    console.log('error', error)
+    if (fs.existsSync(dir)) {
+      fs.rmSync(dir, { recursive: true });
+    }
+
+    return name
   }
+}
 
-  _shouldOverride (file) {
-    const override = this._override
-    const backup = this._backup
+const createMonorepoTest = async (name) => {
+  const dir = `${__dirname}/scafold/templates/__tests__`
 
-    return fs.exists(file)
-    .then(exists => {
-      // File not exists
-      if (!exists) {
-        return true
-      }
+  try {
 
-      // Exists, and not override
-      if (!override) {
-        return false
-      }
+    if (fs.existsSync(dir)) {
+      fs.rmSync(dir, { recursive: true });
+    }
 
-      // Exists, override, and need not to create backup
-      if (!backup) {
-        return true
-      }
-    })
+    fs.mkdirSync(dir)
+    fs.writeFileSync(`${dir}/controller.e2e.spec.ts`, getControllerTest(name))
+    fs.writeFileSync(`${dir}/module.spec.ts`, getModuleTest(name))
+    fs.writeFileSync(`${dir}/service.spec.ts`, getServiceTest(name))
+
+    return '__tests__'
+
+  } catch (error) {
+    console.log('error', error)
+    if (fs.existsSync(dir)) {
+      fs.rmSync(dir, { recursive: true });
+    }
+
+    return '__tests__'
   }
 }
 
 export async function cli(args) {
-  let options = parseArgumentsInoOptions(args)
-  const config = { type:'directory' }
-  const fiePath = await dialog(config)
+  const options = await parseArgumentsInoOptions(args)
 
-  new Scaffold({
-    data: {
-      name: 'module',
-      main: 'lib/index.js'
-    },
-    render: mustache.render
-  })
-  .copy(options.module || options.test || options.app, fiePath[0])
-  .then(() => {
+  const paths = []
+
+  for (const key in options) {
+    if (options[key]) {
+      paths.push(path.resolve(`${__dirname}/../src/scafold/templates/`, options[key]))
+    }
+  }
+
+  console.log('paths', paths)
+
+  const config = { type: 'directory' }
+
+  try {
+    const dir = await dialogNode(config)
+
+    const src = paths[0]
+    const dest = dir[0]
+
+    const name = src.substring(src.lastIndexOf('/') + 1, src.length)
+
+    fse.copySync(src, `${dest}/${name}`, { overwrite: true })
+
+    if (fs.existsSync(paths[0])) {
+      fs.rmSync(paths[0], { recursive: true });
+    }
+
     console.log('done')
-  })
 
-  console.log('options', options, fiePath[0])
+  } catch (error) {
+    console.log(error)
+    if (fs.existsSync(paths[0])) {
+      fs.rmSync(paths[0], { recursive: true });
+    }
+  }
 }
