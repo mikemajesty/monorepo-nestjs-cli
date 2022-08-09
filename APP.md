@@ -75,3 +75,13 @@
     }
    ...
   ```
+  - Add API initialization to e2e tests
+  ```ts
+  ...
+  //jest.config.e2e.ts
+  setupFilesAfterEnv: [
+   ...
+    './client-api/tests/initialization.js',
+   ...
+  ]
+  ```
