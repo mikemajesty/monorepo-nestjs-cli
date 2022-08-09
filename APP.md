@@ -75,7 +75,7 @@
     }
    ...
   ```
-  - Add API initialization to e2e tests
+  - Add API initialization tests envs to e2e global tests envs
   ```ts
   ...
   //jest.config.e2e.ts
