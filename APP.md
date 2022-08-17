@@ -56,7 +56,7 @@
       ...
     };
   ```
-  - Creating API execution
+  - Creating API execution command
   ```ts
    ...
    //package.json
