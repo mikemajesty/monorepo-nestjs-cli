@@ -1,6 +1,6 @@
 {
   "name": "@mikemajesty/monorepo-nestjs-cli",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Monorepo CLI",
   "main": "src/index.js",
   "scripts": {
@@ -20,12 +20,12 @@
   "license": "MIT",
   "dependencies": {
     "arg": "^5.0.1",
+    "cli-select": "^1.1.2",
     "colorette": "^2.0.19",
     "esm": "^3.2.25",
     "fs": "^0.0.1-security",
     "fs-extra": "^10.1.0",
-    "glob-gitignore": "^1.0.14",
-    "node-file-dialog": "^1.0.3",
+    "prompt-sync": "^4.2.0",
     "rimraf": "^3.0.2"
   }
 }

@@ -1,36 +1,19 @@
 import arg from 'arg';
 import fs from 'fs';
-import path from 'path';
 import { bold, green, red } from 'colorette';
 const fse = require('fs-extra');
+import path from 'path';
 const { getController, getAdapter, getModule, getService, getSwagger } = require('./scafold/module');
 const { getControllerTest, getModuleTest, getServiceTest } = require('./scafold/tests');
 const { getJestConfig, getTsconfigBuild, getTsconfig, getPackage, getDockerFile, getDockerignore, getEslitignore, vsCode } = require('./scafold/app/root');
 const { getTests } = require('./scafold/app/tests');
 const { getMain, getSourceModule, health, healthTests } = require('./scafold/app/src');
-const dialogNode = require('node-file-dialog')
+const { exec } = require('child_process');
+const cliSelect = require('cli-select');
+const prompt = require('prompt-sync')();
 
-export const parseArgumentsInoOptions = async (rawArgs) => {
-  const args = arg(
-    {
-      '--module': Boolean,
-      '--test': Boolean,
-      '--name': String,
-      '--app': Boolean,
-    },
-    {
-      argv: rawArgs.slice(2)
-    }
-  )
-  return {
-    template: args._[0],
-    module: args['--module'] ? await createMonorepoModule(args['--name']) : false,
-    test: args['--test'] ? await createMonorepoTest(args['--name']) : false,
-    app: args['--app'] ? await createMonorepoApp(args['--name']) : false
-  }
-}
 
-const createMonorepoApp = (name) => {
+const createMonorepoApp = async (name) => {
   if (!name) throw new Error('--name is required')
   name = name.toLowerCase()
   const dirRoot = `${__dirname}/scafold/templates/${name}-api`
@@ -195,8 +178,48 @@ const createMonorepoTest = async (name) => {
   }
 }
 
+export const parseArgumentsInoOptions = async (input) => {
+  return {
+    module: input.type === 'module' ? await createMonorepoModule(input.name) : false,
+    test: input.type === 'test' ? await createMonorepoTest(input.name) : false,
+    app: input.type === 'api' ? await createMonorepoApp(input.name) : false
+  }
+}
+
 export async function cli(args) {
-  const options = await parseArgumentsInoOptions(args)
+
+  console.log(bold(green('Selecting template...')))
+  const cli = await cliSelect({
+    values: [bold('API'), bold('MODULE'), bold('TEST')],
+    valueRenderer: (value, selected) => {
+      if (selected) {
+        return value;
+      }
+
+      return value;
+    },
+  })
+
+  const mapSelectType = { 0: 'api', 1: 'module', 2: 'test' }[cli.id]
+  const userInput = { name: undefined, type: undefined }
+
+  userInput.type = mapSelectType
+
+  if (!userInput.type) {
+    console.log(red('Type is required'))
+    return
+  }
+
+  const name = prompt(bold(`Type your ${userInput.type.toUpperCase()} name: `));
+
+  if (!name) {
+    console.log(red('Name is required'))
+    return
+  }
+
+  userInput.name = name
+
+  const options = await parseArgumentsInoOptions(userInput)
 
   const paths = []
 
@@ -206,29 +229,30 @@ export async function cli(args) {
     }
   }
 
-  const config = { type: 'directory' }
-
   try {
-    const dir = await dialogNode(config)
 
-    const src = paths[0]
-    const dest = dir[0]
+    exec('zenity --file-selection --directory --title="Choose your path" --filename=$HOME/', async (err, dest) => {
+      if (err) {
+        console.log(err)
+        return
+      }
 
-    const name = src.substring(src.lastIndexOf('/') + 1, src.length)
+      const src = paths[0]
 
-    fse.copySync(src, `${dest}/${name}`, { overwrite: true })
+      const name = src.substring(src.lastIndexOf('/') + 1, src.length)
 
-    if (fs.existsSync(paths[0])) {
-      fs.rmSync(paths[0], { recursive: true });
-    }
+      fse.moveSync(src, `${dest}/${name}`.replace('\n', ''), { overwrite: true });
 
-    const isAPP = args.find(a => a === '--app')
-    
-    console.log(bold(green('done')))
+      if (fs.existsSync(src)) {
+        fs.rmSync(src, { recursive: true });
+      }
 
-    if (isAPP) {
-      console.log(red('!!!!!!!!!!REAMDE!!!!!!!'), bold('https://github.com/mikemajesty/monorepo-nestjs-cli/blob/master/APP.md'))
-    }
+      console.log(bold(green('done')))
+
+      if (userInput.type === 'api') {
+        console.log(red('!!!!!!!!!!REAMDE!!!!!!!'), bold('https://github.com/mikemajesty/monorepo-nestjs-cli/blob/master/APP.md'))
+      }
+    });
 
   } catch (error) {
     console.log(error)
