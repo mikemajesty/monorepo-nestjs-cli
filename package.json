@@ -2,7 +2,7 @@
   "name": "@mikemajesty/monorepo-nestjs-cli",
   "version": "0.1.10",
   "description": "Monorepo CLI",
-  "main": "src/index.js",
+  "main": "src/cli.js",
   "scripts": {
     "permission": "chmod -R 777 ./bin/*"
   },
