@@ -102,7 +102,7 @@ CMD yarn --cwd apps start:${name}-api:prd
 `
 }
 
-const getEslitignore = () => {
+const getEslintIgonre = () => {
   return `# dependencies
 node_modules
 
@@ -110,6 +110,12 @@ node_modules
 .vscode
 .gitignore
 `
+}
+
+const getEslint = () => {
+  return `const config = require('@tools/eslint.config');
+
+  module.exports = config;`
 }
 
 const getDockerignore = () => {
@@ -199,4 +205,4 @@ const vsCode = (name) => {
   }
 }
 
-module.exports = { getJestConfig, getTsconfigBuild, getTsconfig, getPackage, getDockerFile, getDockerignore, getEslitignore, vsCode }
+module.exports = { getJestConfig, getTsconfigBuild, getTsconfig, getPackage, getDockerFile, getDockerignore, getEslintIgonre, vsCode, getEslint }

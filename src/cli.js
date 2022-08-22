@@ -1,11 +1,10 @@
-import arg from 'arg';
 import fs from 'fs';
 import { bold, green, red } from 'colorette';
 const fse = require('fs-extra');
 import path from 'path';
 const { getController, getAdapter, getModule, getService, getSwagger } = require('./scafold/module');
 const { getControllerTest, getModuleTest, getServiceTest } = require('./scafold/tests');
-const { getJestConfig, getTsconfigBuild, getTsconfig, getPackage, getDockerFile, getDockerignore, getEslitignore, vsCode } = require('./scafold/app/root');
+const { getJestConfig, getTsconfigBuild, getTsconfig, getPackage, getDockerFile, getDockerignore, getEslintIgonre, vsCode, getEslint } = require('./scafold/app/root');
 const { getTests } = require('./scafold/app/tests');
 const { getMain, getSourceModule, health, healthTests } = require('./scafold/app/src');
 const { exec } = require('child_process');
@@ -24,8 +23,9 @@ const createMonorepoApp = async (name) => {
     }
 
     fs.mkdirSync(dirRoot)
-    fs.writeFileSync(`${dirRoot}/.dockerignore`, getDockerignore(name))
-    fs.writeFileSync(`${dirRoot}/.eslintignore`, getEslitignore(name))
+    fs.writeFileSync(`${dirRoot}/.dockerignore`, getDockerignore())
+    fs.writeFileSync(`${dirRoot}/.eslintignore`, getEslintIgonre())
+    fs.writeFileSync(`${dirRoot}/.eslintrc.js `, getEslint())
     fs.writeFileSync(`${dirRoot}/jest.config.js`, getJestConfig())
     fs.writeFileSync(`${dirRoot}/Dockerfile`, getDockerFile(name))
     fs.writeFileSync(`${dirRoot}/package.json`, getPackage(name).replace(/''/g, '\''))

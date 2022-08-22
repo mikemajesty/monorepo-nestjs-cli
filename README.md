@@ -69,6 +69,7 @@
 ```
 ### TEST skeleton
 ```
+.
 └── __tests__
     ├── controller.e2e.spec.ts
     ├── module.spec.ts
