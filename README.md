@@ -22,7 +22,7 @@
     ```bash
     # API must be inside [apps] folder - nestjs-monorepo/apps/
     # MODULE must be inside [api] folder - nestjs-monorepo/apps/auth-api/src/modules/
-    # TEST must be inside [modules] folder - nestjs-monorepo/apps/auth-api/src/modules/login/
+    # TEST must be inside [*] folder - nestjs-monorepo/*
     ```
   
 ---
