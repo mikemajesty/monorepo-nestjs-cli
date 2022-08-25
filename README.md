@@ -13,12 +13,18 @@
     ```bash
     $ monorepo-nestjs-cli
     ```
-  - 2 - select template type [API, MODULE, TEST]
-    [<img alt="mikemajesty" src="https://raw.githubusercontent.com/mikemajesty/monorepo-nestjs-cli/master/img/select-template.png">](https://github.com/mikemajesty)
+  - 2 select template type [API, MODULE, TEST]
+  <br>[<img alt="mikemajesty" src="https://raw.githubusercontent.com/mikemajesty/monorepo-nestjs-cli/master/img/select-template.png">](https://github.com/mikemajesty)
 
+  
+  
+  
   - 3 - type template name
-    [<img alt="mikemajesty" src="https://raw.githubusercontent.com/mikemajesty/monorepo-nestjs-cli/master/img/template-name.png">](https://github.com/mikemajesty)
-  - 4 - Select path template
+        <br>[<img alt="mikemajesty" src="https://raw.githubusercontent.com/mikemajesty/monorepo-nestjs-cli/master/img/template-name.png">](https://github.com/mikemajesty)
+ 
+ 
+ 
+ - 4 - Select path template
     ```bash
     # API must be inside [apps] folder - nestjs-monorepo/apps/
     # MODULE must be inside [api] folder - nestjs-monorepo/apps/auth-api/src/modules/
